@@ -74,6 +74,12 @@ func (h *Handler) Update(cfg *Config) error {
 	return nil
 }
 
+// IsAllowed reports whether given IP is allowed.
+func (h *Handler) IsAllowed(ip net.IP) bool {
+	filter := h.ipFilter.Load().(*ipFilter)
+	return filter.isAllowed(ip)
+}
+
 // Same as http.Error func.
 var defaultForbiddenHandler = func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
