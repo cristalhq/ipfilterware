@@ -81,12 +81,12 @@ func (h *Handler) IsAllowed(ip net.IP) bool {
 }
 
 // Same as http.Error func.
-var defaultForbiddenHandler = func(w http.ResponseWriter, r *http.Request) {
+var defaultForbiddenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(http.StatusForbidden)
 	fmt.Fprintln(w, http.StatusText(http.StatusForbidden))
-}
+})
 
 type ipFilter struct {
 	allowed          []*net.IPNet
@@ -99,7 +99,7 @@ func newIPFilter(cfg *Config) (*ipFilter, error) {
 	}
 
 	ipf := &ipFilter{
-		ForbiddenHandler: http.HandlerFunc(defaultForbiddenHandler),
+		ForbiddenHandler: defaultForbiddenHandler,
 	}
 	if cfg.ForbiddenHandler != nil {
 		ipf.ForbiddenHandler = cfg.ForbiddenHandler
