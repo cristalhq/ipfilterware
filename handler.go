@@ -36,6 +36,21 @@ func New(next http.Handler, cfg *Config) (*Handler, error) {
 	return h, nil
 }
 
+// Wrap a given handler.
+func (h *Handler) Wrap(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ip := ipFromRequest(r)
+
+		filter := h.ipFilter.Load().(*ipFilter)
+		if filter.isAllowed(ip) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		filter.ForbiddenHandler.ServeHTTP(w, r)
+	})
+}
+
 // ServeHTTP implements http.Handler interface.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ip := ipFromRequest(r)
