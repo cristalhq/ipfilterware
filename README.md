@@ -5,7 +5,7 @@
 [![reportcard-img]][reportcard-url]
 [![coverage-img]][coverage-url]
 
-Go HTTP middleware to filter clients by IP
+Go HTTP middleware to filter clients by IP.
 
 ## Rationale
 
@@ -24,7 +24,7 @@ To protect your application open to the internet you might want to allow only ve
 Go version 1.17+
 
 ```
-go get github.com/cristaloleg/ipfilterware
+go get github.com/cristalhq/ipfilterware
 ```
 
 ## Example
@@ -41,11 +41,11 @@ See [these docs][pkg-url].
 
 [MIT License](LICENSE).
 
-[build-img]: https://github.com/cristaloleg/ipfilterware/workflows/build/badge.svg
-[build-url]: https://github.com/cristaloleg/ipfilterware/actions
-[pkg-img]: https://pkg.go.dev/badge/cristaloleg/ipfilterware
-[pkg-url]: https://pkg.go.dev/github.com/cristaloleg/ipfilterware
-[reportcard-img]: https://goreportcard.com/badge/cristaloleg/ipfilterware
-[reportcard-url]: https://goreportcard.com/report/cristaloleg/ipfilterware
-[coverage-img]: https://codecov.io/gh/cristaloleg/ipfilterware/branch/master/graph/badge.svg
-[coverage-url]: https://codecov.io/gh/cristaloleg/ipfilterware
+[build-img]: https://github.com/cristalhq/ipfilterware/workflows/build/badge.svg
+[build-url]: https://github.com/cristalhq/ipfilterware/actions
+[pkg-img]: https://pkg.go.dev/badge/cristalhq/ipfilterware
+[pkg-url]: https://pkg.go.dev/github.com/cristalhq/ipfilterware
+[reportcard-img]: https://goreportcard.com/badge/cristalhq/ipfilterware
+[reportcard-url]: https://goreportcard.com/report/cristalhq/ipfilterware
+[coverage-img]: https://codecov.io/gh/cristalhq/ipfilterware/branch/master/graph/badge.svg
+[coverage-url]: https://codecov.io/gh/cristalhq/ipfilterware

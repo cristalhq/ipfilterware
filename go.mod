@@ -1,3 +1,3 @@
-module github.com/cristaloleg/ipfilterware
+module github.com/cristalhq/ipfilterware
 
 go 1.17
