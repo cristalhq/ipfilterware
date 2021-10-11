@@ -17,16 +17,19 @@ type Handler struct {
 
 // Config for the handler.
 type Config struct {
-	// AllowedIPs list of IPs and/or IP submasks to allow.
+	// AllowedIPs list of IPs and/or CIDRs.
 	AllowedIPs []string
 
 	// ForbiddenHandler will be invoked when client is blocked.
-	// If nil then a default handler will be used.
+	// If nil then http.Error will be used.
 	ForbiddenHandler http.Handler
 }
 
-// New creates a new handler which wraps given based on a config.
+// New creates a new handler which wraps handler given based on a config.
 func New(next http.Handler, cfg *Config) (*Handler, error) {
+	if next == nil {
+		return nil, errors.New("next handler cannot be nil")
+	}
 	h := &Handler{
 		next: next,
 	}
@@ -47,7 +50,7 @@ func (h *Handler) Wrap(next http.Handler) http.Handler {
 			return
 		}
 
-		filter.ForbiddenHandler.ServeHTTP(w, r)
+		filter.forbiddenHandler.ServeHTTP(w, r)
 	})
 }
 
@@ -61,7 +64,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filter.ForbiddenHandler.ServeHTTP(w, r)
+	filter.forbiddenHandler.ServeHTTP(w, r)
 }
 
 // Update the handler with a config in a concurrent safe way.
@@ -89,8 +92,9 @@ var defaultForbiddenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 })
 
 type ipFilter struct {
-	allowed          []*net.IPNet
-	ForbiddenHandler http.Handler
+	allowedIP        map[string]struct{}
+	allowedCIDR      []*net.IPNet
+	forbiddenHandler http.Handler
 }
 
 func newIPFilter(cfg *Config) (*ipFilter, error) {
@@ -99,14 +103,14 @@ func newIPFilter(cfg *Config) (*ipFilter, error) {
 	}
 
 	ipf := &ipFilter{
-		ForbiddenHandler: defaultForbiddenHandler,
+		forbiddenHandler: defaultForbiddenHandler,
 	}
 	if cfg.ForbiddenHandler != nil {
-		ipf.ForbiddenHandler = cfg.ForbiddenHandler
+		ipf.forbiddenHandler = cfg.ForbiddenHandler
 	}
 
 	var err error
-	ipf.allowed, err = parseNets(cfg.AllowedIPs)
+	ipf.allowedIP, ipf.allowedCIDR, err = parseIPWithCIDR(cfg.AllowedIPs)
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +118,13 @@ func newIPFilter(cfg *Config) (*ipFilter, error) {
 }
 
 func (ipf *ipFilter) isAllowed(ip net.IP) bool {
-	return isIPInNetwork(ipf.allowed, ip)
-}
-
-func isIPInNetwork(nets []*net.IPNet, ip net.IP) bool {
-	for _, cidr := range nets {
+	if ip == nil {
+		return false
+	}
+	if _, ok := ipf.allowedIP[ip.String()]; ok {
+		return true
+	}
+	for _, cidr := range ipf.allowedCIDR {
 		if cidr.Contains(ip) {
 			return true
 		}
@@ -134,14 +140,20 @@ func ipFromRequest(r *http.Request) net.IP {
 	return net.ParseIP(ip)
 }
 
-func parseNets(nets []string) ([]*net.IPNet, error) {
-	ipnets := make([]*net.IPNet, 0, len(nets))
-	for _, expr := range nets {
-		_, cidr, err := net.ParseCIDR(expr)
-		if err != nil {
-			return nil, err
+func parseIPWithCIDR(nets []string) (map[string]struct{}, []*net.IPNet, error) {
+	ips := make(map[string]struct{}, len(nets))
+	cidrs := make([]*net.IPNet, 0, len(nets))
+
+	for _, n := range nets {
+		if _, cidr, err := net.ParseCIDR(n); err == nil {
+			cidrs = append(cidrs, cidr)
+			continue
 		}
-		ipnets = append(ipnets, cidr)
+		if ip := net.ParseIP(n); ip != nil {
+			ips[n] = struct{}{}
+			continue
+		}
+		return nil, nil, fmt.Errorf("bad IP or CIDR: %q", n)
 	}
-	return ipnets, nil
+	return ips, cidrs, nil
 }
