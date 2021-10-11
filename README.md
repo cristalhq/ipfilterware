@@ -18,6 +18,7 @@ To protect your application open to the internet you might want to allow only ve
 * Thread-safe updates.
 * Dependency-free.
 * Fetches for popular providers.
+  * See [fetchers_test.go](https://github.com/cristalhq/ipfilterware/blob/main/fetchers_test.go).
 
 ## Install
 
