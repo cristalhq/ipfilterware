@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-var dummyHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
-
 func TestHandler(t *testing.T) {
 	var count int
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +30,7 @@ func TestHandler(t *testing.T) {
 }
 
 func TestSingleIP(t *testing.T) {
-	f, err := New(dummyHandler, &Config{
+	f, err := New(nil, &Config{
 		AllowedIPs: []string{
 			"100.120.130.1/32",
 			"200.120.130.1",

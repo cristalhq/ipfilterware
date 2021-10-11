@@ -27,9 +27,6 @@ type Config struct {
 
 // New creates a new handler which wraps handler given based on a config.
 func New(next http.Handler, cfg *Config) (*Handler, error) {
-	if next == nil {
-		return nil, errors.New("next handler cannot be nil")
-	}
 	h := &Handler{
 		next: next,
 	}
