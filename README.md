@@ -5,7 +5,7 @@
 [![reportcard-img]][reportcard-url]
 [![coverage-img]][coverage-url]
 
-Go HTTP middleware to filter clients by IP.
+Go HTTP middleware to filter clients by IP address.
 
 ## Rationale
 
@@ -31,7 +31,25 @@ go get github.com/cristalhq/ipfilterware
 ## Example
 
 ```go
-TODO
+// your handler or mux/router
+var myHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// do something good
+	w.WriteHeader(http.StatusOK)
+})
+
+// some IPs to allow (see fetchers_test.go for DNS and proxy helpers)
+ips := []string{"10.20.30.40", "100.100.99.1", "42.42.42.42"}
+
+// create ipfilterware handler to pass allowed IPs to myHandler 
+handler, err := ipfilterware.New(myHandler, &ipfilterware.Config{
+	AllowedIPs: ips,
+})
+if err != nil {
+	panic(err)
+}
+
+// use handler as a router or middleware
+http.ListenAndServe(":8080", handler)
 ```
 
 ## Documentation
