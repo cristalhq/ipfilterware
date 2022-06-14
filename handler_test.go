@@ -1,9 +1,9 @@
 package ipfilterware
 
 import (
-	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/netip"
 	"testing"
 )
 
@@ -52,7 +52,7 @@ func TestSingleIP(t *testing.T) {
 		{"10.20.0.1", false},
 	}
 	for i, tc := range testCases {
-		if f.IsAllowed(net.ParseIP(tc.ip)) != tc.isAllowed {
+		if f.IsAllowed(netip.MustParseAddr(tc.ip)) != tc.isAllowed {
 			t.Errorf("[%d] ip %q must be %v", i, tc.ip, tc.isAllowed)
 		}
 	}
