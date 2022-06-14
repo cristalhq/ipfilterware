@@ -44,10 +44,9 @@ func (h *Handler) Wrap(next http.Handler) http.Handler {
 		filter := h.ipFilter.Load().(*ipFilter)
 		if filter.isAllowed(ip) {
 			next.ServeHTTP(w, r)
-			return
+		} else {
+			filter.forbiddenHandler.ServeHTTP(w, r)
 		}
-
-		filter.forbiddenHandler.ServeHTTP(w, r)
 	})
 }
 
@@ -58,10 +57,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	filter := h.ipFilter.Load().(*ipFilter)
 	if filter.isAllowed(ip) {
 		h.next.ServeHTTP(w, r)
-		return
+	} else {
+		filter.forbiddenHandler.ServeHTTP(w, r)
 	}
-
-	filter.forbiddenHandler.ServeHTTP(w, r)
 }
 
 // Update the handler with a config in a concurrent safe way.
